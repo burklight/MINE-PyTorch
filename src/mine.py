@@ -79,14 +79,11 @@ class MINE(torch.nn.Module):
         mi = (T - torch.log(expT)).item() / math.log(2)
         return mi, T, expT
     
-    def train(self, dataset, learning_rate = 1e-3, batch_size = 256, n_iterations = int(5e3), n_verbose = 1000, n_window = 100, decay_rate = 0.9, n_decay = -1, save_progress=200):
+    def train(self, dataset, learning_rate = 1e-3, batch_size = 256, n_iterations = int(5e3), n_verbose = 1000, n_window = 100, save_progress=200):
 
         device = 'cuda' if next(self.network.parameters()).is_cuda else 'cpu'
-
         optimizer = torch.optim.Adam(self.network.parameters(), lr=learning_rate)
-        if n_decay > 0:
-            scheduler = torch.optim.lr_scheduler.StepLR(optimizer,n_decay,decay_rate)
-
+        
         iteration = 0
         moving_average_expT = 1
         mi = torch.empty(n_window)
@@ -115,9 +112,6 @@ class MINE(torch.nn.Module):
                 
                 if save_progress > 0 and iteration % save_progress == save_progress - 1:
                     mi_progress[int(iteration / save_progress)] = mi.mean().item()
-            
-                if iteration % n_decay == n_decay - 1:
-                    scheduler.step()
 
         if save_progress > 0:
             return mi_progress

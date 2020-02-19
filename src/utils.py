@@ -1,5 +1,6 @@
 import torch, torchvision
 import numpy as np
+import argparse
 
 np.random.seed(0)
 
@@ -66,3 +67,36 @@ def weight_init(m):
     elif isinstance(m, torch.nn.Linear):
         torch.nn.init.xavier_normal_(m.weight.data)
         torch.nn.init.zeros_(m.bias.data)
+
+def get_args():
+
+    parser = argparse.ArgumentParser(
+        description = 'Run the experiments of MINE',
+        formatter_class = argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    parser.add_argument('--figs_dir', default = '../figures/',
+        help = 'folder to output the resulting images')
+    parser.add_argument('--n_iterations', type = int, default = int(5e3),
+        help = 'number of training epochs')
+    parser.add_argument('--batch_size', type = int, default = 128,
+        help = 'mini-batch size for the SGD')
+    parser.add_argument('--learning_rate', type = float, default = 1e-3,
+        help = 'initial learning rate')
+    parser.add_argument('--n_verbose', type = int, default = -1,
+        help = 'number of iterations for showing the current MI, if -1, then never')
+    parser.add_argument('--n_window', type = int, default = 100,
+        help = 'number of iterations taken into consideration for the averaging the MI (moving average)')
+    parser.add_argument('--save_progress', type = int, default = -1, 
+        help = 'sampling rate of the MI, if -1, nothing is saved')    
+    parser.add_argument('--d', type = int, default = 1,
+        help = 'dimensionality of the Gaussians in the example')
+    parser.add_argument('--n_rhos', type = int, default = 19,
+        help = 'number of rhos for the Gaussian experiment')
+    parser.add_argument('--example', choices = ['Gaussian', 'MNIST'], default = 'Gaussian',
+        help = 'example to run')    
+
+    return parser.parse_args()
+
+
+

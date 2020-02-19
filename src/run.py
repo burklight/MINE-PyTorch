@@ -7,13 +7,12 @@ import torch
 np.random.seed(0)
 torch.manual_seed(0)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+args = utils.get_args()
 
-example = 'Gaussian'
+if args.example == 'Gaussian':
 
-if example == 'Gaussian':
-
-    n_rhos = 19
-    d = 10
+    n_rhos = args.n_rhos
+    d = args.d
     MI_real = np.empty(n_rhos)
     MI_mine = np.empty(n_rhos)
 
@@ -31,8 +30,8 @@ if example == 'Gaussian':
         
         # Compute the estimation of the MI 
         dataset = utils.BiVariateGaussianDatasetForMI(d, rho, 5000)
-        mine_network = mine.MINE(d,d, hidden_size=100, moving_average_rate=0.1).to(device)
-        MI_mine[i] = mine_network.train(dataset, batch_size = 4096, n_iterations=int(5e3), n_verbose=-1, n_window=10, save_progress=-1)
+        mine_network = mine.MINE(d,d, hidden_size=100).to(device)
+        MI_mine[i] = mine_network.train(dataset, batch_size = args.batch_size, n_iterations=args.n_iterations, n_verbose=args.n_verbose, n_window=args.n_window, save_progress=args.save_progress)
 
         print(f'Rho {rho:.2f}: Real ({MI_real[i]:.3f}) - Estimated ({MI_mine[i]:.3f})')
 
@@ -41,16 +40,12 @@ if example == 'Gaussian':
     plt.legend()
     plt.savefig(f'../figures/{d}-dimensional_gaussian_mi.png')
 
-if example == 'MNIST':
-
-    n_iterations = int(25e3) 
-    n_window = 100
-    save_progress = 125
+if args.example == 'MNIST':
 
     dataset = utils.MNISTForMI()
     mine_network = mine.MINE((28,28),1,network_type='cnn').to(device)
-    MI_mine = mine_network.train(dataset, batch_size=1024, n_iterations=n_iterations, n_verbose=1000, n_window=n_window, learning_rate=1e-3, decay_rate=0.9, n_decay=-1, save_progress=save_progress)
-    iterations = np.linspace(save_progress,n_iterations,int(n_iterations/save_progress))
+    MI_mine = mine_network.train(dataset, batch_size = args.batch_size, n_iterations=args.n_iterations, n_verbose=args.n_verbose, n_window=args.n_window, save_progress=args.save_progress)
+    iterations = np.linspace(args.save_progress,args.n_iterations,int(args.n_iterations/args.save_progress))
     plt.plot(iterations, np.log2(10)*np.ones_like(iterations) ,'black',label='Real MI')
     plt.plot(iterations, MI_mine, 'orange', label='Estimated MI')
     plt.legend() 
