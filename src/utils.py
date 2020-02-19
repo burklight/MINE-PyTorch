@@ -35,7 +35,6 @@ class MNISTForMI(torch.utils.data.Dataset):
         dataset = torchvision.datasets.MNIST('../data', train=True, download=True)
         X = dataset.data.float()
         self.X = ((X - X.mean()) / X.std()).unsqueeze(1)
-        #self.Y = torch.FloatTensor(len(dataset.train_labels),10).zero_().scatter_(1,dataset.train_labels.reshape(-1,1),1)
         self.Y = dataset.targets.float()
     
     def __len__(self):
